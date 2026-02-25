@@ -1,5 +1,6 @@
 package com.ovais.gifster.features.home.presentation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import gifster.composeapp.generated.resources.Res
+import gifster.composeapp.generated.resources.ic_error
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ErrorDialogOverlay(
@@ -73,13 +77,12 @@ fun ErrorDialog(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Error icon
-              /*  Icon(
-                    imageVector = Icons.Default.ErrorOutline,
-                    contentDescription = "Error",
-                    tint = Color.Red,
+
+                Image(
+                    painter = painterResource(Res.drawable.ic_error),
+                    null,
                     modifier = Modifier.size(48.dp)
-                )*/
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

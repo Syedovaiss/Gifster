@@ -1,7 +1,9 @@
 package com.ovais.gifster.features.home.presentation
 
+import com.ovais.gifster.core.data.http.Gif
+
 sealed interface HomeEffect {
-    data class OnNavigateToSearch(val query: String) : HomeEffect
+    object OnNavigateToSearch : HomeEffect
     object OnNavigateToRandom : HomeEffect
-    object OnNavigateToGifDetail : HomeEffect
+    data class OnNavigateToGifDetail(val item: Gif) : HomeEffect
 }

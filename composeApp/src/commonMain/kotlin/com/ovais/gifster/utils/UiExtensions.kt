@@ -32,3 +32,6 @@ fun shimmerBrush(): Brush {
         end = Offset(translateAnim, 0f)
     )
 }
+
+typealias Callback = () -> Unit
+typealias ParameterizedCallback<T> = (T) -> Unit

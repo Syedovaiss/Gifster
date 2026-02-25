@@ -85,7 +85,7 @@ class HomeViewModel(
     fun onIntent(intent: HomeIntent) {
         when (intent) {
             is HomeIntent.OnSearchGif -> {
-                updateEffect(HomeEffect.OnNavigateToSearch(intent.query))
+                updateEffect(HomeEffect.OnNavigateToSearch)
             }
 
             is HomeIntent.OnGenerateRandom -> {
@@ -93,7 +93,7 @@ class HomeViewModel(
             }
 
             is HomeIntent.OnGifClicked -> {
-                updateEffect(HomeEffect.OnNavigateToGifDetail)
+                updateEffect(HomeEffect.OnNavigateToGifDetail(intent.item))
             }
 
             is HomeIntent.OnLoadMore -> {
