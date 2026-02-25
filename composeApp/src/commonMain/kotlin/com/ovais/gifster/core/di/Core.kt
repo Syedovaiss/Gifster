@@ -2,6 +2,8 @@ package com.ovais.gifster.core.di
 
 import com.ovais.gifster.features.home.di.homeFactoryModule
 import com.ovais.gifster.features.home.di.homeViewModelModule
+import com.ovais.gifster.features.search.di.searchFactoryModule
+import com.ovais.gifster.features.search.di.searchViewModelModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -16,7 +18,10 @@ fun initKoin(config: KoinAppDeclaration? = null) {
             networkModule,
             // Home
             homeFactoryModule,
-            homeViewModelModule
+            homeViewModelModule,
+            // Search
+            searchFactoryModule,
+            searchViewModelModule
         )
     }
 }

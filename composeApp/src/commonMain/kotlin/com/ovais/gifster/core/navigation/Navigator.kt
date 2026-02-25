@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ovais.gifster.features.home.presentation.HomeScreen
+import com.ovais.gifster.features.search.presentation.SearchScreen
 
 @Composable
 fun Gifster() {
@@ -20,9 +21,11 @@ fun Gifster() {
             entry<Routes.Home> { HomeScreen(
                 onDetails = {},
                 onRandom = {},
-                onSearch = {}
+                onSearch = {
+                    backStack.add(Routes.Search)
+                }
             ) }
-//            entry<Settings> { SettingsScreen { backStack.removeLastOrNull() } }
+            entry<Routes.Search> { SearchScreen {  } }
         },
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),

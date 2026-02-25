@@ -13,6 +13,13 @@ interface NetworkClient {
         offset: Int,
         rating: String
     ): Result<GifResponse, DataError.Remote>
+
+    suspend fun searchGif(
+        limit: Int,
+        offset: Int,
+        rating: String,
+        query: String
+    ): Result<GifResponse, DataError.Remote>
 }
 
 class DefaultNetworkClient(
@@ -25,6 +32,7 @@ class DefaultNetworkClient(
         private const val KEY_RATING = "rating"
         private const val KEY_BUNDLE = "bundle"
         private const val BUNDLE_MESSAGING_NON_CLIPS = "messaging_non_clips"
+        private const val KEY_QUERY = "q"
     }
 
     override suspend fun getCategories(): Result<CategoryResponse, DataError.Remote> =
@@ -39,6 +47,23 @@ class DefaultNetworkClient(
     ): Result<GifResponse, DataError.Remote> {
         return safeCall<GifResponse> {
             httpClient.get(TRENDING_GIFS_ENDPOINT) {
+                parameter(KEY_LIMIT, limit)
+                parameter(KEY_OFFSET, offset)
+                parameter(KEY_RATING, rating)
+                parameter(KEY_BUNDLE, BUNDLE_MESSAGING_NON_CLIPS)
+            }
+        }
+    }
+
+    override suspend fun searchGif(
+        limit: Int,
+        offset: Int,
+        rating: String,
+        query: String
+    ): Result<GifResponse, DataError.Remote> {
+        return safeCall<GifResponse> {
+            httpClient.get(SEARCH_GIFS_ENDPOINT) {
+                parameter(KEY_QUERY, query)
                 parameter(KEY_LIMIT, limit)
                 parameter(KEY_OFFSET, offset)
                 parameter(KEY_RATING, rating)
