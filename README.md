@@ -1,48 +1,113 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM).
+# Gifster – Compose Multiplatform GIF App
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
-
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
-
-### Build and Run Android Application
-
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
-
-### Build and Run Desktop (JVM) Application
-
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+Gifster is a **cross-platform GIF application** built using **Kotlin Compose Multiplatform**, supporting **Android and iOS**. It allows users to browse trending GIFs, search GIFs, view GIF details, download, share, and explore random GIFs.  
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Features
+
+- **Home Screen**
+  - Browse trending GIFs
+  - Access random GIF generator
+  - Navigate to search screen
+
+- **Search**
+  - Debounced search with results
+  - Pagination support for large result sets
+  - Empty and error state handling
+
+- **GIF Detail Screen**
+  - Fullscreen GIF display
+  - Title, rating, type, sticker info
+  - Download GIF to device
+  - Share GIF using native share sheet
+  - Uses cached images for performance
+
+- **Random GIF Generator**
+  - Confirmation dialog before generating random GIF
+  - Fetches from API and navigates to detail view
+
+- **Error Handling**
+  - Custom dialogs with retry/dismiss actions
+  - Network & image loading errors
+
+---
+
+## Tech Stack
+
+- **Kotlin Compose Multiplatform**
+- **Kotlin Coroutines & Flow**
+- **Koin for Dependency Injection**
+- **Coil / CachedImage for image loading**
+- **Ktor HTTP client**
+
+---
+
+## Project Structure
+
+```
+composeApp/
+├── commonMain/       # Shared business logic, UI components
+├── androidMain/      # Android-specific implementations (FileProvider, sharing)
+├── iosMain/          # iOS-specific implementations
+├── features/
+│   ├── home/
+│   ├── search/
+│   ├── gif_detail/
+│   └── random/
+└── core/
+├── navigation/
+├── data/
+└── utils/
+```
+
+---
+
+## Setup
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/gifster.git
+cd gifster
+```
+### 2. Android
+	•	Open in Android Studio Flamingo+
+	•	Ensure minSdkVersion >= 26
+
+### 4. iOS
+	•	Open iosApp.xcworkspace in Xcode 14+
+	•	Configure signing & provisioning
+	•	GIF sharing uses UIActivityViewController
+	•	Run on simulator or real device
+
+### Dependency Injection
+	•	Uses Koin across all platforms
+	•	Provides platform-specific implementations for:
+	•	GifFileDownloader
+	•	GifFileSharer
+	•	Platform contexts
+
+### Caching
+	•	GIF images are cached in memory and disk
+	•	Retry mechanism for failed image loads
+	•	Uses AsyncImage + CachePolicy.ENABLED (Coil)
+
+### Navigation
+	•	Uses Navigation 3
+	•	NavDisplay + Routes sealed class for screens
+	•	Supports:
+	•	Back stack
+	•	Subview composition
+	•	Dialog overlays
+  
+### API Integration
+	•	Fetch trending, search, and random GIFs from Giphy API
+	•	Pagination support with offset calculation
+	•	Network error handling using onSuccess / onError extensions
+  
+### Contributing
+	1.	Fork the repository
+	2.	Create your feature branch
+	3.	Commit your changes
+	4.	Push and create a pull request
