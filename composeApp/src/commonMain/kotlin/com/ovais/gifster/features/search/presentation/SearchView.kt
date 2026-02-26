@@ -7,16 +7,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,7 +65,11 @@ fun SearchScreen(
             is SearchUiState.Success -> {
                 SearchResultsGrid(
                     results = (state as SearchUiState.Success).results,
-                    onGifClicked = onGifClicked
+                    onGifClicked = onGifClicked,
+                    isLoadingMore = (state as SearchUiState.Success).isLoadingMore,
+                    onLoadMore = {
+                        viewModel.onIntent(SearchIntent.LoadMore)
+                    }
                 )
             }
 
@@ -82,24 +91,65 @@ fun SearchScreen(
 @Composable
 fun SearchResultsGrid(
     results: List<Gif>,
+    isLoadingMore: Boolean,
+    onLoadMore: () -> Unit,
     onGifClicked: (Gif) -> Unit
 ) {
+    val gridState = rememberLazyGridState()
+
+    // Pagination trigger
+    LaunchedEffect(gridState, results.size) {
+        snapshotFlow {
+            gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        }.collect { lastVisibleIndex ->
+
+            val totalItems = gridState.layoutInfo.totalItemsCount
+
+            if (
+                lastVisibleIndex != null &&
+                lastVisibleIndex >= totalItems - 4 &&
+                !isLoadingMore
+            ) {
+                onLoadMore()
+            }
+        }
+    }
+
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Adaptive(150.dp),
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(results, key = { it.id.toString() }) { gif ->
+
+        itemsIndexed(
+            items = results,
+            key = { index, gif -> "${gif.id}_$index" }
+        ) { _, gif ->
             TrendingGifItem(
                 gif = gif,
-                onClick = onGifClicked
+                onClick = onGifClicked,
+                onViewClick = onGifClicked
             )
+        }
+
+        // Bottom Loader
+        if (isLoadingMore) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
-
 @Composable
 fun SearchLoadingView() {
     Box(

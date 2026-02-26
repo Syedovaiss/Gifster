@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ovais.gifster.core.data.network.onError
 import com.ovais.gifster.core.data.network.onSuccess
-import com.ovais.gifster.features.home.presentation.HomeUiState
 import com.ovais.gifster.features.search.data.SearchRequestParam
 import com.ovais.gifster.features.search.domain.SearchGifUseCase
 import com.ovais.gifster.utils.calculateOffset
@@ -53,20 +52,14 @@ class SearchViewModel(
     }
 
     private fun loadMore() {
-        _currentPage.value = currentPage.value + 1
-        _uiState.update { state ->
-            when (state) {
-                is SearchUiState.Success -> {
-                    state.copy(
-                        isLoadingMore = true
-                    )
-                }
+        val state = _uiState.value
 
-                else -> state
+        if (state is SearchUiState.Success && !state.isLoadingMore) {
+            _currentPage.value += 1
+
+            viewModelScope.launch {
+                search(state.query)
             }
-        }
-        viewModelScope.launch {
-            search(queryFlow.value)
         }
     }
 
@@ -77,37 +70,105 @@ class SearchViewModel(
                 .debounce(500)
                 .distinctUntilChanged()
                 .collectLatest { query ->
+
                     if (query.isBlank()) {
+                        _currentPage.value = 1
                         _uiState.value = SearchUiState.Idle
-                    } else {
-                        search(query)
+                        return@collectLatest
                     }
+                    _currentPage.value = 1
+
+                    search(query)
                 }
         }
     }
 
     private suspend fun search(query: String) {
-        _uiState.value = SearchUiState.Loading(query)
+
+        val isFirstPage = currentPage.value == 1
+
+        // 1️⃣ Only show full Loading on first page
+        if (isFirstPage) {
+            _uiState.value = SearchUiState.Loading(query)
+        } else {
+            _uiState.update { state ->
+                if (state is SearchUiState.Success) {
+                    state.copy(isLoadingMore = true)
+                } else state
+            }
+        }
+
         try {
             val param = SearchRequestParam(
                 offset = calculateOffset(pageNumber = currentPage.value),
                 query = query
             )
-            searchGifUseCase(param).onSuccess { result ->
-                if (result.isEmpty()) {
-                    _uiState.value = SearchUiState.Empty(query)
-                } else {
-                    _uiState.value = SearchUiState.Success(query, result, isLoadingMore = false)
-                }
-            }.onError {
 
-            }
+            searchGifUseCase(param)
+                .onSuccess { result ->
+
+                    if (result.isEmpty() && isFirstPage) {
+                        _uiState.value = SearchUiState.Empty(query)
+                        return@onSuccess
+                    }
+
+                    _uiState.update { state ->
+                        when (state) {
+
+                            is SearchUiState.Success -> {
+                                state.copy(
+                                    results = if (isFirstPage) {
+                                        result
+                                    } else {
+                                        state.results + result
+                                    },
+                                    isLoadingMore = false
+                                )
+                            }
+
+                            // First successful load
+                            is SearchUiState.Loading -> {
+                                SearchUiState.Success(
+                                    query = query,
+                                    results = result,
+                                    isLoadingMore = false
+                                )
+                            }
+
+                            else -> state
+                        }
+                    }
+                }
+
+                .onError { error ->
+
+                    _uiState.update { state ->
+                        when (state) {
+                            is SearchUiState.Success -> {
+                                state.copy(isLoadingMore = false)
+                            }
+
+                            else -> SearchUiState.Error(
+                                query = query,
+                                message = "Something went wrong"
+                            )
+                        }
+                    }
+                }
 
         } catch (e: Exception) {
-            _uiState.value = SearchUiState.Error(
-                query = query,
-                message = e.message ?: "Something went wrong"
-            )
+            _uiState.update { state ->
+                when (state) {
+                    is SearchUiState.Success -> {
+                        state.copy(isLoadingMore = false)
+                    }
+
+                    else -> SearchUiState.Error(
+                        query = query,
+                        message = e.message ?: "Something went wrong"
+                    )
+                }
+            }
         }
     }
 }

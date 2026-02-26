@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -144,13 +144,23 @@ fun HomeView(
                 CategoriesSection(categories)
             }
 
-            items(trendingGifs, key = { it.id.toString() }) { gif ->
+            itemsIndexed(
+                items = trendingGifs,
+                key = { index, gif -> "${gif.id}_$index" }
+            ) { _, gif ->
                 TrendingGifItem(
                     gif = gif,
                     onClick = onGifClicked,
-                    onViewClick = { /* optional: view counter click */ }
+                    onViewClick = onGifClicked
                 )
             }
+            /*items(trendingGifs, key = { it.id.toString() }) { gif ->
+                TrendingGifItem(
+                    gif = gif,
+                    onClick = onGifClicked,
+                    onViewClick = { *//* optional: view counter click *//* }
+                )
+            }*/
 
             if (isLoadingMore) {
                 item(span = { GridItemSpan(columns) }) {
@@ -231,7 +241,7 @@ fun CategoryItem(
 fun TrendingGifItem(
     gif: Gif,
     onClick: ParameterizedCallback<Gif>,
-    onViewClick: Callback? = null
+    onViewClick: ParameterizedCallback<Gif>? = null
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -263,7 +273,7 @@ fun TrendingGifItem(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(28.dp)
-                        .clickable { onViewClick() }
+                        .clickable { onViewClick(gif) }
                 )
             }
         }
