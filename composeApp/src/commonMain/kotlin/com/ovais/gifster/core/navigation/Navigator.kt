@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.ovais.gifster.features.gif_detail.presentation.GifDetailScreen
 import com.ovais.gifster.features.home.presentation.HomeScreen
 import com.ovais.gifster.features.search.presentation.SearchScreen
 
@@ -19,13 +20,20 @@ fun Gifster() {
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<Routes.Home> { HomeScreen(
-                onDetails = {},
+                onDetails = {
+                    backStack.add(Routes.GifDetail(it))
+                },
                 onRandom = {},
                 onSearch = {
                     backStack.add(Routes.Search)
                 }
             ) }
-            entry<Routes.Search> { SearchScreen {  } }
+            entry<Routes.Search> { SearchScreen(
+                onGifClicked = {
+                    backStack.add(Routes.GifDetail(it))
+                }
+            ) }
+            entry<Routes.GifDetail> { GifDetailScreen(it.gif)}
         },
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),

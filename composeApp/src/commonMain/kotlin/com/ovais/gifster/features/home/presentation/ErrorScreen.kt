@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,7 +56,6 @@ fun ErrorDialogOverlay(
         )
     }
 }
-
 @Composable
 fun ErrorDialog(
     message: String,
@@ -64,75 +65,76 @@ fun ErrorDialog(
     Dialog(
         onDismissRequest = { onDismiss?.invoke() }
     ) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+        // Wrap content and center
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
                 modifier = Modifier
-                    .background(Color.White)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .widthIn(max = 320.dp)
+                    .wrapContentHeight()
             ) {
-
-                Image(
-                    painter = painterResource(Res.drawable.ic_error),
-                    null,
-                    modifier = Modifier.size(48.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Title
-                Text(
-                    text = "Oops!",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Message
-                Text(
-                    text = message,
-                    fontSize = 16.sp,
-                    color = Color.DarkGray,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Buttons
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Column(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    onRetry?.let {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Oops!",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = message,
+                        fontSize = 16.sp,
+                        color = Color.DarkGray,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        onRetry?.let {
+                            Button(
+                                onClick = onRetry,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Red,
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Retry")
+                            }
+                        }
+
                         Button(
-                            onClick = onRetry,
+                            onClick = { onDismiss?.invoke() },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red,
-                                contentColor = Color.White
+                                containerColor = Color.LightGray,
+                                contentColor = Color.Black
                             ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Retry")
+                            Text("Dismiss")
                         }
-                    }
-
-                    Button(
-                        onClick = { onDismiss?.invoke() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.LightGray,
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Dismiss")
                     }
                 }
             }
