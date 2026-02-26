@@ -2,6 +2,7 @@ package com.ovais.gifster.core.data.network
 
 import com.ovais.gifster.core.data.http.CategoryResponse
 import com.ovais.gifster.core.data.http.GifResponse
+import com.ovais.gifster.features.random.data.RandomGifResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -20,6 +21,8 @@ interface NetworkClient {
         rating: String,
         query: String
     ): Result<GifResponse, DataError.Remote>
+
+    suspend fun generateRandom(): Result<RandomGifResponse, DataError.Remote>
 }
 
 class DefaultNetworkClient(
@@ -69,6 +72,12 @@ class DefaultNetworkClient(
                 parameter(KEY_RATING, rating)
                 parameter(KEY_BUNDLE, BUNDLE_MESSAGING_NON_CLIPS)
             }
+        }
+    }
+
+    override suspend fun generateRandom(): Result<RandomGifResponse, DataError.Remote> {
+        return safeCall<RandomGifResponse> {
+            httpClient.get(RANDOM_GIF_ENDPOINT)
         }
     }
 }

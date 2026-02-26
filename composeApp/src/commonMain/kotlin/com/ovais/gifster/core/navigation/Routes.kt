@@ -6,4 +6,5 @@ sealed interface Routes {
     data object Home : Routes
     data object Search : Routes
     data class GifDetail(val gif: Gif) : Routes
+    object RandomGif : Routes
 }
